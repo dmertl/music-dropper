@@ -1,0 +1,3 @@
+[submodule "javascripts/jquery-filedrop"]
+	path = javascripts/jquery-filedrop
+	url = git://github.com/weixiyen/jquery-filedrop.git
