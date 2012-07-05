@@ -1,0 +1,17 @@
+body {
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 14px;
+}
+
+#dropbox {
+	width: 400px;
+	height: 400px;
+	border: solid 1px #333;
+	text-align: center;
+	vertical-align: middle;
+}
+#dropbox .progress {
+	height: 20px;
+	width: 0px;
+	background-color: green;
+}
