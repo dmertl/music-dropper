@@ -12,16 +12,18 @@ $(function() {
 		url:'post_file.php',
 
 		uploadFinished:function(i, file, response) {
-			console.log('uploadFinished');
-			console.log(i);
-			console.log(file);
-			console.log(response);
-
-//			$.data(file).addClass('done');
-			// response is the JSON object that post_file.php returns
+			if(response && response.status && response.status == 'Success') {
+				dropbox.find('.progress').width('100%');
+				addUploadLink(file);
+				//TODO: update progress bar to indicate success, fade and remove after timeout
+				alert('Upload of "' + file.name + '" complete');
+			} else {
+				//TODO: set error indicator on progress bar, attach response.status
+			}
 		},
 
 		error:function(err, file) {
+			//TODO: place errors in a status window rather than using alerts
 			switch(err) {
 				case 'BrowserNotSupported':
 					showMessage('Your browser does not support HTML5 file uploads!');
@@ -33,39 +35,25 @@ $(function() {
 					alert(file.name + ' is too large! Please upload files up to 2mb.');
 					break;
 				default:
+					alert(err);
 					break;
 			}
 		},
 
-		// Called before each upload is started
-		beforeEach:function(file) {
-//			if(!file.type.match(/^image\//)) {
-//				alert('Only images are allowed!');
-//
-//				// Returning false will cause the
-//				// file to be rejected
-//				return false;
-//			}
-		},
-
 		uploadStarted:function(i, file, len) {
-			console.log('uploadStarted');
-			console.log(i);
-			console.log(file);
-			console.log(len);
+			dropbox.find('.progress').width('0%').show();
 		},
 
 		progressUpdated:function(i, file, progress) {
-			console.log('progressUpdated');
-			console.log(i);
-			console.log(file);
-			console.log(progress);
-			console.log(dropbox);
 			dropbox.find('.progress').width(progress + '%');
-			//$.data(file).find('.progress').width(progress);
 		}
 
 	});
+
+	function addUploadLink(file) {
+		//TODO: use some kind of pop-in animation
+		$('#uploads').prepend('<li><a href="uploads/' + file.name + '">' + file.name + '</a></li>');
+	}
 
 	function showMessage(msg) {
 		message.html(msg);

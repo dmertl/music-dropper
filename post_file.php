@@ -1,53 +1,42 @@
 <?php
+
+require_once('lib/Logger.php');
+
 // If you want to ignore the uploaded files,
 // set $demo_mode to true;
 
-$demo_mode = false;
 $upload_dir = 'uploads/';
-$allowed_ext = array('jpg', 'jpeg', 'png', 'gif');
+$allowed_mime_types = array('audio/mpeg3', 'audio/mpeg');
+
+Logger::write('debug', 'Request from: ' . $_SERVER['REMOTE_ADDR']);
+Logger::write('debug', 'File upload: ' . print_r($_FILES, true));
 
 if(strtolower($_SERVER['REQUEST_METHOD']) != 'post') {
-	exit_status('Error! Wrong HTTP method!');
+	exit_status('Error! Wrong HTTP method!', 400, 'Must make a POST request');
 }
 
 if(array_key_exists('pic', $_FILES) && $_FILES['pic']['error'] == 0) {
 
 	$pic = $_FILES['pic'];
 
-	if(!in_array(get_extension($pic['name']), $allowed_ext)) {
-		exit_status('Only ' . implode(',', $allowed_ext) . ' files are allowed!');
+	if(!in_array($_FILES['pic']['type'], $allowed_mime_types)) {
+		exit_status('Only ' . implode(',', $allowed_mime_types) . ' files are allowed!', 400, 'Invalid file type, please upload an mp3');
 	}
 
-	if($demo_mode) {
-
-		// File uploads are ignored. We only log them.
-
-		$line = implode('		', array(date('r'), $_SERVER['REMOTE_ADDR'], $pic['size'], $pic['name']));
-		file_put_contents('log.txt', $line . PHP_EOL, FILE_APPEND);
-
-		exit_status('Uploads are ignored in demo mode.');
-	}
-
-	// Move the uploaded file from the temporary
-	// directory to the uploads folder:
-
+	//TODO: return error if file with same name already exists
 	if(move_uploaded_file($pic['tmp_name'], $upload_dir . $pic['name'])) {
-		exit_status('File was uploaded successfuly!');
+		exit_status('Success');
 	}
 
 }
 
-exit_status('Something went wrong with your upload!');
+exit_status('Something went wrong with your upload!', 400, 'File upload failed');
 
 // Helper functions
 
-function exit_status($str) {
+function exit_status($str, $status = 200, $message = '') {
+	Logger::write('debug', 'Response: ' . $status . ' ' . $message . ' ' . $str);
+	header('HTTP/1.1 ' . $status . ' ' . $message);
 	echo json_encode(array('status' => $str));
 	exit;
-}
-
-function get_extension($file_name) {
-	$ext = explode('.', $file_name);
-	$ext = array_pop($ext);
-	return strtolower($ext);
 }
